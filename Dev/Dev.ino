@@ -1,10 +1,6 @@
-/*Note: solder the crystal better!!!! */
-
-
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Wire.h>
 #include "RTClib.h"
-// include the library code:
 #include <LiquidCrystal.h>
 
 
@@ -13,12 +9,11 @@
    //#define Serial SerialUSB
 #endif
 
-//alarm settings
+//alarm button settings
 const int incrTimePin = 3;
 const int decrTimePin = 4;
 int incrTime = 0;
 int decrTime = 0;
-
 
 //alarm time and date
 int alarmHour = 23;
@@ -39,12 +34,11 @@ int lookup[64] = {1,2,4,6,9,12,16,20,25,30,36,
 529,552,576,600,625,650,676,702,729,756,784,
 812,841,870,900,930,961,992,992,992};
 
-// initialize the library with the numbers of the interface pins
+// initialize the LCD library with the numbers of the interface pins
 LiquidCrystal lcd(7,8,9,10,11,12);
 
+//initialize the real time clock
 RTC_DS1307 rtc;
-
-char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 
 void setup () {
 
@@ -81,47 +75,6 @@ void setup () {
 
 void loop () {
     DateTime now = rtc.now();
-    /*
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(" (");
-    Serial.print(daysOfTheWeek[now.dayOfTheWeek()]);
-    Serial.print(") ");
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println();
-    */
-    /*
-    Serial.print(" since midnight 1/1/1970 = ");
-    Serial.print(now.unixtime());
-    Serial.print("s = ");
-    Serial.print(now.unixtime() / 86400L);
-    Serial.println("d");
-    
-    // calculate a date which is 7 days and 30 seconds into the future
-    DateTime future (now + TimeSpan(7,12,30,6));
-    
-    Serial.print(" now + 7d + 30s: ");
-    Serial.print(future.year(), DEC);
-    Serial.print('/');
-    Serial.print(future.month(), DEC);
-    Serial.print('/');
-    Serial.print(future.day(), DEC);
-    Serial.print(' ');
-    Serial.print(future.hour(), DEC);
-    Serial.print(':');
-    Serial.print(future.minute(), DEC);
-    Serial.print(':');
-    Serial.print(future.second(), DEC);
-    Serial.println();
-    */
-    //Serial.println();
     
     /*alarm*/
     lcd.setCursor(7,0);
@@ -135,12 +88,13 @@ void loop () {
     }
     lcd.print(alarmMinute);
   
-    /*timer*/
+    /*clock*/
     lcd.setCursor(6, 1);
+    if(now.hour() < 10){
+      lcd.print("0")l
+    }
     lcd.print(now.hour());
-    //lcd.setCursor(8,1);
     lcd.print(":");
-    //lcd.setCursor(9,1);
     if(now.minute() < 10){
       lcd.print("0");
     }
@@ -170,7 +124,7 @@ void loop () {
           delayMicroseconds(5000-duty);
         }
       }
-    }
+    }//end if
     else if((alarmHour-now.hour()) == 1 && (now.minute()-alarmMinute) >= 45){
       Serial.println("Alarm on");
       
@@ -195,14 +149,10 @@ void loop () {
           delayMicroseconds(5000-duty);
         }
       }
-    }
-    else{
-      
-    }
+    }//end else if
 
-
+    //logic to increase alarm time
     incrTime = digitalRead(incrTimePin);
-    //Serial.println(incrTime);
     if(incrTime == 0){
       alarmMinute = alarmMinute + 1;
       if(alarmMinute >= 60){
@@ -213,8 +163,9 @@ void loop () {
         }
       }
     }
+
+    //logic to decrease alarm time
     decrTime = digitalRead(decrTimePin);
-    //Serial.println(incrTime);
     if(decrTime == 0){
       alarmMinute = alarmMinute - 1;
       if(alarmMinute < 0){
