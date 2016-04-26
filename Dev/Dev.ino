@@ -40,6 +40,19 @@ LiquidCrystal lcd(7,8,9,10,11,12);
 //initialize the real time clock
 RTC_DS1307 rtc;
 
+void displayCurrentTime(DateTime now){
+  lcd.setCursor(6, 1);
+    if(now.hour() < 10){
+      lcd.print("0");
+    }
+    lcd.print(now.hour());
+    lcd.print(":");
+    if(now.minute() < 10){
+      lcd.print("0");
+    }
+    lcd.print(now.minute());  
+}
+
 void setup () {
 
   pinMode(incrTimePin, INPUT);
@@ -89,31 +102,12 @@ void loop () {
     lcd.print(alarmMinute);
   
     /*clock*/
-    lcd.setCursor(6, 1);
-    if(now.hour() < 10){
-      lcd.print("0")l
-    }
-    lcd.print(now.hour());
-    lcd.print(":");
-    if(now.minute() < 10){
-      lcd.print("0");
-    }
-    lcd.print(now.minute());
+    displayCurrentTime(now);
 
     /*Logic for alarm to be triggered*/
     if(alarmHour == now.hour() && (alarmMinute-now.minute()) <= 15){
       Serial.println("Alarm on");
-      for (i=0; i<steps; i++)
-       {
-        lcd.setCursor(6, 1);
-        lcd.print(now.hour());
-        //lcd.setCursor(8,1);
-        lcd.print(":");
-        //lcd.setCursor(9,1);
-        if(now.minute() < 10){
-          lcd.print("0");
-        }
-        lcd.print(now.minute());
+      for (i=0; i<steps; i++){
         duty = lookup[i] * 5;
         for (j=0; j<sunrisespeed; j++)
         {
@@ -122,31 +116,21 @@ void loop () {
           delayMicroseconds(duty);
           digitalWrite(pulsepin, LOW);
           delayMicroseconds(5000-duty);
+          displayCurrentTime(now);
         }
       }
     }//end if
     else if((alarmHour-now.hour()) == 1 && (now.minute()-alarmMinute) >= 45){
       Serial.println("Alarm on");
-      
-      for (i=0; i<steps; i++)
-      {
-        lcd.setCursor(6, 1);
-        lcd.print(now.hour());
-        //lcd.setCursor(8,1);
-        lcd.print(":");
-        //lcd.setCursor(9,1);
-        if(now.minute() < 10){
-          lcd.print("0");
-        }
-        lcd.print(now.minute());
+      for (i=0; i<steps; i++){
         duty = lookup[i] * 5;
-        for (j=0; j<sunrisespeed; j++)
-        {
+        for (j=0; j<sunrisespeed; j++){
           // one pulse of PWM
           digitalWrite(pulsepin, HIGH);
           delayMicroseconds(duty);
           digitalWrite(pulsepin, LOW);
           delayMicroseconds(5000-duty);
+          displayCurrentTime(now);
         }
       }
     }//end else if
